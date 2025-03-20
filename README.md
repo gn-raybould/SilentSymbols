@@ -26,6 +26,3 @@
    - 2 days to connect logic with GUI
    - 3 days to test application, fix bugs, and make necessary changes
    - 3 days to prepare and practice presentation
-   
->>>>>>> origin/main
-# SilentSymbols
