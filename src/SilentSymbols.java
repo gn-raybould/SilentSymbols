@@ -8,26 +8,40 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.util.ArrayList; // Import ArrayList
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class SilentSymbols extends Application {
 
-    private ArrayList<String> imagePaths; // Use ArrayList to hold image paths
+    private static final double IMAGE_WIDTH = 75;  // Desired width for all images
+    private static final double IMAGE_HEIGHT = 75; // Desired height for all images
+
+    private HashMap<String, List<String>> wordBank; // HashMap to hold words and their corresponding image paths
+    private List<String> letterBank; // List to hold letters for the Easy mode
     private Random random; // Random object for selecting images
+    private String currentWord; // To store the current word for answer checking
+    private String currentLetter; // To store the current letter for answer checking
 
     @Override
     public void start(Stage primaryStage) {
-        // Initialize the random object and load images
+        // Initialize the random object and load the word bank and letter bank
         random = new Random();
-        imagePaths = loadImagesFromFolder("C:/Users/Administrator/Object Oriented Programming/SilentSymbols/ASL_Images");
+        wordBank = loadWordBank(); // Load the word bank from the file
+        letterBank = loadLetterBank(); // Load the letter bank from the file
+
+        // Create Labels
+        Label difficultyLabel = new Label("Please choose your difficulty");
+        Label welcomeLabel = new Label("Welcome to Silent Symbols!");
 
         // Create buttons
         Button easyBtn = new Button("Easy");
         Button hardBtn = new Button("Hard");
-        Label title = new Label("Welcome to Silent Symbols!");
-        
 
         // Set actions for buttons
         easyBtn.setOnAction(event -> showEasyScene(primaryStage));
@@ -35,19 +49,25 @@ public class SilentSymbols extends Application {
 
         // Create a layout for the main scene
         Pane mainLayout = new Pane();
-        easyBtn.setLayoutX(75); // X position for Easy button
-        easyBtn.setLayoutY(200); // Y position for Easy button
-        hardBtn.setLayoutX(175); // X position for Hard button
-        hardBtn.setLayoutY(200); // Y position for Hard button
+        easyBtn.setLayoutX(75);
+        easyBtn.setLayoutY(190);
+        hardBtn.setLayoutX(175);
+        hardBtn.setLayoutY(190);
+        difficultyLabel.setLayoutX(60);
+        difficultyLabel.setLayoutY(150);
+        welcomeLabel.setLayoutX(35);
+        welcomeLabel.setLayoutY(100);
+        difficultyLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: blue;");
+        welcomeLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: red;");
 
         // Add buttons to the main layout
-        mainLayout.getChildren().addAll(easyBtn, hardBtn);
+        mainLayout.getChildren().addAll(easyBtn, hardBtn, difficultyLabel, welcomeLabel);
 
         // Create a scene with the layout
         Scene mainScene = new Scene(mainLayout, 300, 400);
 
         // Set the title and scene for the primary stage
-        primaryStage.setTitle("Select Difficulty");
+        primaryStage.setTitle("Silent Symbols");
         primaryStage.setScene(mainScene);
         primaryStage.show();
     }
@@ -56,40 +76,63 @@ public class SilentSymbols extends Application {
         // Create a new scene for the Easy difficulty
         Pane easyLayout = new Pane();
 
-        String randomImagePathEasy = getRandomImagePath();
-        Image imageEasy = new Image("file:///" + randomImagePathEasy);
+        // Select a random letter from the letter bank
+        currentLetter = letterBank.get(random.nextInt(letterBank.size()));
+        String randomImagePathEasy = "ASL_Images/" + currentLetter + ".png"; // Relative path
+
+        // Load the image
+        Image imageEasy = new Image(getClass().getClassLoader().getResourceAsStream(randomImagePathEasy));
+        if (imageEasy.isError()) {
+            // System.out.println("Error loading image: " + randomImagePathEasy); // Removed debugging output
+        }
+
         ImageView imageViewEasy = new ImageView(imageEasy);
-        imageViewEasy.setFitWidth(50); // Set the width of the image
+        imageViewEasy.setFitWidth(IMAGE_WIDTH); // Set the desired width
+        imageViewEasy.setFitHeight(IMAGE_HEIGHT); // Set the desired height
         imageViewEasy.setPreserveRatio(true); // Preserve the aspect ratio
 
         imageViewEasy.setLayoutX(100);
         imageViewEasy.setLayoutY(100);
 
         TextField userInput = new TextField();
-        userInput.setLayoutX(50); // X position for the text field
-        userInput.setLayoutY(160); // Y position for the text field
-        userInput.setPrefWidth(200); // Set preferred width for the text field
+        userInput.setLayoutX(50);
+        userInput.setLayoutY(160);
+        userInput.setPrefWidth(200);
 
         // Create a submit button
         Button submitButton = new Button("Submit");
-        submitButton.setLayoutX(50); // X position for the submit button
-        submitButton.setLayoutY(190); // Y position for the submit button
-
-        Button easyButton = new Button("You selected Easy!");
-        easyButton.setLayoutX(50); // X position for Easy button
-        easyButton.setLayoutY(50); // Y position for Easy button
+        submitButton.setLayoutX(100);
+        submitButton.setLayoutY(190);
 
         Label displayLabel = new Label();
-        displayLabel.setLayoutX(50);
+        displayLabel.setLayoutX(100);
         displayLabel.setLayoutY(220);
 
         submitButton.setOnAction(event -> {
             String inputText = userInput.getText();
-            displayLabel.setText("You entered: " +inputText);
+            if (inputText.equalsIgnoreCase(currentLetter)) {
+                displayLabel.setText("Correct!");
+            } else {
+                displayLabel.setText("Try again!");
+            }
         });
 
-        easyLayout.getChildren().addAll(easyButton, imageViewEasy, userInput, submitButton, displayLabel);
-        
+        // New Letter button
+        Button newLetterButton = new Button("New Letter");
+        newLetterButton.setLayoutX(50);
+        newLetterButton.setLayoutY(350);
+        newLetterButton.setOnAction(event -> {
+            showEasyScene(primaryStage); // Refresh the Easy scene with a new letter
+        });
+
+        // Back button to return to main menu
+        Button backButton = new Button("Back");
+        backButton.setLayoutX(200);
+        backButton.setLayoutY(350);
+        backButton.setOnAction(event -> primaryStage.setScene(createMainScene(primaryStage)));
+
+        easyLayout.getChildren().addAll(imageViewEasy, userInput, submitButton, displayLabel, newLetterButton, backButton);
+
         Scene easyScene = new Scene(easyLayout, 300, 400);
         primaryStage.setScene(easyScene);
     }
@@ -98,92 +141,142 @@ public class SilentSymbols extends Application {
         // Create a new scene for the Hard difficulty using a Pane
         Pane hardLayout = new Pane();
 
-        // Load random images from the list
-        String randomImagePath1 = getRandomImagePath();
-        Image image1 = new Image("file:///" + randomImagePath1);
-        ImageView imageView1 = new ImageView(image1);
-        imageView1.setFitWidth(50); // Set the width of the image
-        imageView1.setPreserveRatio(true); // Preserve the aspect ratio
+        // Select a random word from the word bank
+        List<String> words = new ArrayList<>(wordBank.keySet());
+        currentWord = words.get(random.nextInt(words.size())); // Store the current word
+        List<String> imagePathsForWord = wordBank.get(currentWord);
 
-        String randomImagePath2 = getRandomImagePath();
-        Image image2 = new Image("file:///" + randomImagePath2);
-        ImageView imageView2 = new ImageView(image2);
-        imageView2.setFitWidth(50);
-        imageView2.setPreserveRatio(true);
+        // Create ImageViews for each image corresponding to the selected word
+        List<ImageView> imageViews = new ArrayList<>();
+        for (int i = 0; i < Math.min(4, imagePathsForWord.size()); i++) { // Limit to 4 images
+            String imagePath = imagePathsForWord.get(i);
+            // System.out.println("Loading image from path: " + imagePath); // Removed debugging output
+            Image image = new Image(getClass().getClassLoader().getResourceAsStream(imagePath));
+            if (image == null) {
+                // System.out.println("Error: Image not found at path: " + imagePath); // Removed debugging output
+            } else if (image.isError()) {
+                // System.out.println("Error loading image from path: " + imagePath); // Removed debugging output
+            }
+            ImageView imageView = new ImageView(image);
+            imageView.setFitWidth(IMAGE_WIDTH); // Set the desired width
+            imageView.setFitHeight(IMAGE_HEIGHT); // Set the desired height
+            imageView.setPreserveRatio(true); // Preserve the aspect ratio
+            imageViews.add(imageView);
+        }
 
-        String randomImagePath3 = getRandomImagePath();
-        Image image3 = new Image("file:///" + randomImagePath3);
-        ImageView imageView3 = new ImageView(image3);
-        imageView3.setFitWidth(50);
-        imageView3.setPreserveRatio(true);
+        // Layout the images
+        for (int i = 0; i < imageViews.size(); i++) {
+            imageViews.get(i).setLayoutX(10 + (i * (IMAGE_WIDTH + 10))); // Spacing between images
+            imageViews.get(i).setLayoutY(50);
+            hardLayout.getChildren().add(imageViews.get(i));
+        }
 
-        String randomImagePath4 = getRandomImagePath();
-        Image image4 = new Image("file:///" + randomImagePath4);
-        ImageView imageView4 = new ImageView(image4);
-        imageView4.setFitWidth(50);
-        imageView4.setPreserveRatio(true);
-
-        // Set the position of the images
-        imageView1.setLayoutX(50); // X position for image 1
-        imageView1.setLayoutY(50); // Y position for image 1
-
-        imageView2.setLayoutX(120); // X position for image 2 (next to image 1)
-        imageView2.setLayoutY(50); // Y position for image 2
-
-        imageView3.setLayoutX(190); // X position for image 3 (next to image 2)
-        imageView3.setLayoutY(50); // Y position for image 3
-
-        imageView4.setLayoutX(260 ); // X position for image 4 (next to image 3)
-        imageView4.setLayoutY(50); // Y position for image 4
-
-        // Add a button to indicate the selection
-        Button hardButton = new Button("You selected Hard!");
-        hardButton.setLayoutX(50); // X position for the button
-        hardButton.setLayoutY(120); // Y position for the button
-
-        // Create a TextField for user input
         TextField userInput = new TextField();
-        userInput.setLayoutX(50); // X position for the text field
-        userInput.setLayoutY(160); // Y position for the text field
-        userInput.setPrefWidth(200); // Set preferred width for the text field
+        userInput.setLayoutX(50);
+        userInput.setLayoutY(160);
+        userInput.setPrefWidth(200);
 
         // Create a submit button
         Button submitButton = new Button("Submit");
-        submitButton.setLayoutX(50); // X position for the submit button
-        submitButton.setLayoutY(190); // Y position for the submit button
+        submitButton.setLayoutX(125);
+        submitButton.setLayoutY(190);
 
         Label displayLabel = new Label();
-        displayLabel.setLayoutX(50);
+        displayLabel.setLayoutX(125);
         displayLabel.setLayoutY(220);
 
         submitButton.setOnAction(event -> {
             String inputText = userInput.getText();
-            displayLabel.setText("You entered: " +inputText);
+            if (inputText.equalsIgnoreCase(currentWord)) {
+                displayLabel.setText("Correct!");
+            } else {
+                displayLabel.setText("Try again!");
+            }
         });
 
-        // Add all components to the hard layout
-        hardLayout.getChildren().addAll(imageView1, imageView2, imageView3, imageView4, hardButton, userInput, submitButton, displayLabel);
+        // New Word button
+        Button newWordButton = new Button("New Word");
+        newWordButton.setLayoutX(50);
+        newWordButton.setLayoutY(350);
+        newWordButton.setOnAction(event -> {
+            showHardScene(primaryStage); // Refresh the Hard scene with a new word
+        });
 
-        // Create a scene for the Hard difficulty
+        // Back button to return to main menu
+        Button backButton = new Button("Back");
+        backButton.setLayoutX(200);
+        backButton.setLayoutY(350);
+        backButton.setOnAction(event -> primaryStage.setScene(createMainScene(primaryStage)));
+
+        hardLayout.getChildren().addAll(userInput, submitButton, displayLabel, newWordButton, backButton);
+
         Scene hardScene = new Scene(hardLayout, 300, 400);
         primaryStage.setScene(hardScene);
     }
 
-    private String getRandomImagePath() {
-        // Select a random image path from the ArrayList
-        return imagePaths.get(random.nextInt(imagePaths.size()));
+    private Scene createMainScene(Stage primaryStage) {
+        Pane mainLayout = new Pane();
+
+        // Create Labels
+        Label difficultyLabel = new Label("Please choose your difficulty");
+        Label welcomeLabel = new Label("Welcome to Silent Symbols!");
+
+        // Create buttons
+        Button easyBtn = new Button("Easy");
+        Button hardBtn = new Button("Hard");
+
+        // Set layout for labels and buttons
+        easyBtn.setLayoutX(75);
+        easyBtn.setLayoutY(190);
+        hardBtn.setLayoutX(175);
+        hardBtn.setLayoutY(190);
+        difficultyLabel.setLayoutX(60);
+        difficultyLabel.setLayoutY(150);
+        welcomeLabel.setLayoutX(35);
+        welcomeLabel.setLayoutY(100);
+        difficultyLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: blue;");
+        welcomeLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: red;");
+
+        // Set actions for buttons
+        easyBtn.setOnAction(event -> showEasyScene(primaryStage));
+        hardBtn.setOnAction(event -> showHardScene(primaryStage));
+
+        // Add labels and buttons to the main layout
+        mainLayout.getChildren().addAll(easyBtn, hardBtn, difficultyLabel, welcomeLabel);
+
+        return new Scene(mainLayout, 300, 400);
     }
 
-    private ArrayList<String> loadImagesFromFolder(String folderPath) {
-        ArrayList<String> imagePaths = new ArrayList<>();
-        File folder = new File(folderPath);
-        File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".png") || name.toLowerCase().endsWith(".jpg") || name.toLowerCase().endsWith(".jpeg"));
-        if (files != null) {
-            for (File file : files) {
-                imagePaths.add(file.getAbsolutePath());
+    private HashMap<String, List<String>> loadWordBank() {
+        HashMap<String, List<String>> wordBank = new HashMap<>();
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("wordbank.txt");
+             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+            if (inputStream == null) {
+                throw new IOException("Resource not found: wordbank.txt");
             }
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                String word = parts[0].trim();
+                List<String> images = new ArrayList<>();
+                for (int i = 1; i < parts.length; i++) {
+                    // Corrected path construction
+                    images.add("ASL_Images/" + parts[i].trim() + ".png"); // Assuming images are named by the letter
+                }
+                wordBank.put(word, images);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return imagePaths;
+        return wordBank;
+    }
+
+    private List<String> loadLetterBank() {
+        List<String> letterBank = new ArrayList<>();
+        for (char letter = 'A'; letter <= 'Z'; letter++) {
+            letterBank.add(String.valueOf(letter));
+        }
+        return letterBank;
     }
 
     public static void main(String[] args) {

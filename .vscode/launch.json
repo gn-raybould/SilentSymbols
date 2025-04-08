@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch SilentSymbols",
+            "request": "launch",
+            "mainClass": "SilentSymbols",  // No package prefix since it's in the default package
+            "vmArgs": "--module-path \"C:\\Users\\Administrator\\Object Oriented Programming\\javafx-sdk-24\\lib\" --add-modules javafx.controls,javafx.fxml",
+            "cwd": "C:\\Users\\Administrator\\Object Oriented Programming\\SilentSymbols\\src",  // Set the current working directory to src
+            "classPaths": [
+                "C:\\Users\\Administrator\\Object Oriented Programming\\SilentSymbols\\src"  // Ensure the classpath points to src
+            ]
+        }
+    ]
+}
