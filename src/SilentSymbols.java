@@ -1,3 +1,4 @@
+import java.awt.Panel;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -49,16 +50,19 @@ public class SilentSymbols extends Application {
 
         // Create a layout for the main scene
         Pane mainLayout = new Pane();
+        mainLayout.setStyle("-fx-background-color: #BEF2FBFF");
         easyBtn.setLayoutX(75);
         easyBtn.setLayoutY(190);
+        easyBtn.setStyle("-fx-background-color: black; -fx-text-fill: white; ");
         hardBtn.setLayoutX(175);
+        hardBtn.setStyle("-fx-background-color: black; -fx-text-fill: white; ");
         hardBtn.setLayoutY(190);
         difficultyLabel.setLayoutX(60);
         difficultyLabel.setLayoutY(150);
         welcomeLabel.setLayoutX(35);
         welcomeLabel.setLayoutY(100);
-        difficultyLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: blue;");
-        welcomeLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: red;");
+        difficultyLabel.setStyle("-fx-font-size: 15px; -fx-text-fill:rgb(250, 115, 255);");
+        welcomeLabel.setStyle("-fx-font-size: 20px; -fx-text-fill:rgb(28, 164, 255);");
 
         // Add buttons to the main layout
         mainLayout.getChildren().addAll(easyBtn, hardBtn, difficultyLabel, welcomeLabel);
@@ -69,13 +73,14 @@ public class SilentSymbols extends Application {
         // Set the title and scene for the primary stage
         primaryStage.setTitle("Silent Symbols");
         primaryStage.setScene(mainScene);
+        
         primaryStage.show();
     }
 
     private void showEasyScene(Stage primaryStage) {
         // Create a new scene for the Easy difficulty
         Pane easyLayout = new Pane();
-
+        easyLayout.setStyle("-fx-background-color: #BEF2FBFF");
         // Select a random letter from the letter bank
         currentLetter = letterBank.get(random.nextInt(letterBank.size()));
         String randomImagePathEasy = "ASL_Images/" + currentLetter + ".png"; // Relative path
@@ -91,8 +96,9 @@ public class SilentSymbols extends Application {
         imageViewEasy.setFitHeight(IMAGE_HEIGHT); // Set the desired height
         imageViewEasy.setPreserveRatio(true); // Preserve the aspect ratio
 
-        imageViewEasy.setLayoutX(100);
-        imageViewEasy.setLayoutY(100);
+        imageViewEasy.setLayoutX(125);
+        imageViewEasy.setLayoutY(75);
+        
 
         TextField userInput = new TextField();
         userInput.setLayoutX(50);
@@ -101,19 +107,22 @@ public class SilentSymbols extends Application {
 
         // Create a submit button
         Button submitButton = new Button("Submit");
-        submitButton.setLayoutX(100);
+        submitButton.setLayoutX(123);
         submitButton.setLayoutY(190);
+        submitButton.setStyle("-fx-background-color: black; -fx-text-fill: white; ");
 
         Label displayLabel = new Label();
-        displayLabel.setLayoutX(100);
-        displayLabel.setLayoutY(220);
+        displayLabel.setLayoutX(115);
+        displayLabel.setLayoutY(250);
 
         submitButton.setOnAction(event -> {
             String inputText = userInput.getText();
             if (inputText.equalsIgnoreCase(currentLetter)) {
                 displayLabel.setText("Correct!");
+                displayLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: green;");
             } else {
                 displayLabel.setText("Try again!");
+                displayLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: red;");
             }
         });
 
@@ -121,6 +130,7 @@ public class SilentSymbols extends Application {
         Button newLetterButton = new Button("New Letter");
         newLetterButton.setLayoutX(50);
         newLetterButton.setLayoutY(350);
+        newLetterButton.setStyle("-fx-background-color: black; -fx-text-fill: white; ");
         newLetterButton.setOnAction(event -> {
             showEasyScene(primaryStage); // Refresh the Easy scene with a new letter
         });
@@ -129,6 +139,7 @@ public class SilentSymbols extends Application {
         Button backButton = new Button("Back");
         backButton.setLayoutX(200);
         backButton.setLayoutY(350);
+        backButton.setStyle("-fx-background-color: black; -fx-text-fill: white; ");
         backButton.setOnAction(event -> primaryStage.setScene(createMainScene(primaryStage)));
 
         easyLayout.getChildren().addAll(imageViewEasy, userInput, submitButton, displayLabel, newLetterButton, backButton);
@@ -140,7 +151,7 @@ public class SilentSymbols extends Application {
     private void showHardScene(Stage primaryStage) {
         // Create a new scene for the Hard difficulty using a Pane
         Pane hardLayout = new Pane();
-
+        hardLayout.setStyle("-fx-background-color: #BEF2FBFF");
         // Select a random word from the word bank
         List<String> words = new ArrayList<>(wordBank.keySet());
         currentWord = words.get(random.nextInt(words.size())); // Store the current word
@@ -166,7 +177,7 @@ public class SilentSymbols extends Application {
 
         // Layout the images
         for (int i = 0; i < imageViews.size(); i++) {
-            imageViews.get(i).setLayoutX(10 + (i * (IMAGE_WIDTH + 10))); // Spacing between images
+            imageViews.get(i).setLayoutX(10 + (i * (IMAGE_WIDTH + 3))); // Spacing between images
             imageViews.get(i).setLayoutY(50);
             hardLayout.getChildren().add(imageViews.get(i));
         }
@@ -180,17 +191,20 @@ public class SilentSymbols extends Application {
         Button submitButton = new Button("Submit");
         submitButton.setLayoutX(125);
         submitButton.setLayoutY(190);
+        submitButton.setStyle("-fx-background-color: black; -fx-text-fill: white; ");
 
         Label displayLabel = new Label();
-        displayLabel.setLayoutX(125);
-        displayLabel.setLayoutY(220);
+        displayLabel.setLayoutX(115);
+        displayLabel.setLayoutY(250);
 
         submitButton.setOnAction(event -> {
             String inputText = userInput.getText();
             if (inputText.equalsIgnoreCase(currentWord)) {
                 displayLabel.setText("Correct!");
+                displayLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: green;");
             } else {
                 displayLabel.setText("Try again!");
+                displayLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: red;");
             }
         });
 
@@ -198,6 +212,7 @@ public class SilentSymbols extends Application {
         Button newWordButton = new Button("New Word");
         newWordButton.setLayoutX(50);
         newWordButton.setLayoutY(350);
+        newWordButton.setStyle("-fx-background-color: black; -fx-text-fill: white; ");
         newWordButton.setOnAction(event -> {
             showHardScene(primaryStage); // Refresh the Hard scene with a new word
         });
@@ -206,6 +221,7 @@ public class SilentSymbols extends Application {
         Button backButton = new Button("Back");
         backButton.setLayoutX(200);
         backButton.setLayoutY(350);
+        backButton.setStyle("-fx-background-color: black; -fx-text-fill: white; ");
         backButton.setOnAction(event -> primaryStage.setScene(createMainScene(primaryStage)));
 
         hardLayout.getChildren().addAll(userInput, submitButton, displayLabel, newWordButton, backButton);
@@ -216,14 +232,17 @@ public class SilentSymbols extends Application {
 
     private Scene createMainScene(Stage primaryStage) {
         Pane mainLayout = new Pane();
-
+        mainLayout.setStyle("-fx-background-color: #BEF2FBFF");
         // Create Labels
         Label difficultyLabel = new Label("Please choose your difficulty");
         Label welcomeLabel = new Label("Welcome to Silent Symbols!");
-
+        difficultyLabel.setStyle("-fx-font-size: 15px; -fx-text-fill:rgb(250, 115, 255);");
+        welcomeLabel.setStyle("-fx-font-size: 20px; -fx-text-fill:rgb(28, 164, 255);");
         // Create buttons
         Button easyBtn = new Button("Easy");
         Button hardBtn = new Button("Hard");
+        easyBtn.setStyle("-fx-background-color: black; -fx-text-fill: white; ");
+        hardBtn.setStyle("-fx-background-color: black; -fx-text-fill: white; ");
 
         // Set layout for labels and buttons
         easyBtn.setLayoutX(75);
@@ -234,8 +253,7 @@ public class SilentSymbols extends Application {
         difficultyLabel.setLayoutY(150);
         welcomeLabel.setLayoutX(35);
         welcomeLabel.setLayoutY(100);
-        difficultyLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: blue;");
-        welcomeLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: red;");
+
 
         // Set actions for buttons
         easyBtn.setOnAction(event -> showEasyScene(primaryStage));
